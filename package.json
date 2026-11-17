@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/telnet/client.js && node --check src/core/heartbeat.js && node --check src/core/heartbeat-cycle.js && node --check src/run-heartbeat.js && npm --prefix plugins/server-bridge run check",
+    "check": "node --check src/telnet/client.js && node --check src/core/heartbeat.js && node --check src/core/heartbeat-cycle.js && node --check src/run-heartbeat.js && node --check src/utils/file-reader.js && npm --prefix plugins/server-bridge run check",
     "heartbeat": "node src/run-heartbeat.js",
     "bridge": "npm --prefix plugins/server-bridge run bridge"
   },

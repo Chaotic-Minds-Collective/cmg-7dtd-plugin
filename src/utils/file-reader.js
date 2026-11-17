@@ -1,21 +1,16 @@
-const path = require('path');
-const fs = require('fs').promises;
+import { readFile, realpath } from "node:fs/promises";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 
-/**
- * Safely reads a file within the designated base directory, preventing path traversal.
- * @param {string} baseDir - Allowed root directory (e.g., './data')
- * @param {string} userPath - User-supplied or config file path
- * @returns {Promise<string>} - File contents
- */
-async function safeReadServerFile(baseDir, userPath) {
-  const resolvedBase = path.resolve(baseDir);
-  const resolvedTarget = path.resolve(resolvedBase, userPath);
-
-  if (!resolvedTarget.startsWith(resolvedBase)) {
-    throw new Error('Security Error: Path traversal attempt detected.');
+/** Read an existing file only when its real path is inside the allowed root. */
+export async function safeReadServerFile(baseDir, userPath) {
+  if (typeof baseDir !== "string" || !baseDir.trim() || typeof userPath !== "string" || !userPath) {
+    throw new TypeError("A non-empty base directory and file path are required.");
   }
-
-  return await fs.readFile(resolvedTarget, 'utf8');
+  const base = await realpath(resolve(baseDir));
+  const target = await realpath(resolve(base, userPath));
+  const fromBase = relative(base, target);
+  if (fromBase === ".." || fromBase.startsWith(`..${sep}`) || isAbsolute(fromBase)) {
+    throw new Error("Security Error: Path traversal attempt detected.");
+  }
+  return readFile(target, "utf8");
 }
-
-module.exports = { safeReadServerFile };
